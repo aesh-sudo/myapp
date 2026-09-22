@@ -11,6 +11,12 @@ pipeline {
                 sh 'kubectl version --client'
             }
         }
+        stage('Prepare manifests') {
+            steps {
+                sh "sed -i 's/IMAGE_TAG/${BUILD_NUMBER}/g' k8s/deployment.yml"
+                sh 'cat k8s/deployment.yml | grep image:'
+            }
+        }
         stage('Deploy to K8s') {
             steps {
                 withCredentials([file(credentialsId: 'minikube-config', variable: 'KUBECONFIG')]) {

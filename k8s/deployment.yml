@@ -14,7 +14,8 @@ spec:
     spec:
       containers:
         - name: myapp
-          image: my-app:latest
+#          image: my-app:latest
+          image: my-app:IMAGE_TAG
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8081
