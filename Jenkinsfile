@@ -6,21 +6,15 @@ pipeline {
         }
     }
     stages {
-        stage('Verify kubectl') {
-            steps {
-                sh 'kubectl version --client'
-            }
-        }
-        stage('Prepare manifests') {
-            steps {
-                sh "sed -i 's/IMAGE_TAG/${BUILD_NUMBER}/g' k8s/deployment.yml"
-                sh 'cat k8s/deployment.yml | grep image:'
-            }
-        }
         stage('Deploy to K8s') {
             steps {
                 withCredentials([file(credentialsId: 'minikube-config', variable: 'KUBECONFIG')]) {
-                    sh 'kubectl apply -f k8s/deployment.yml'
+                    sh '''
+                        curl -fsSL -o helm.tar.gz https://get.helm.sh/helm-v3.14.3-linux-amd64.tar.gz
+                        tar -xzf helm.tar.gz
+                        export PATH=$PWD/linux-amd64:$PATH
+                        helm upgrade --install my-app ./helm-charts/my-app-chart --set image.tag=${BUILD_NUMBER}
+                    '''
                     sh 'kubectl get pods'
                 }
             }
